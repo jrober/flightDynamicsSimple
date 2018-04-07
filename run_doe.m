@@ -1,9 +1,6 @@
 % load parameters in
-% A = csvread('DOE.csv',1,0);
 
-% kp = A(:,1);
-% kd = A(:,2);
-
+flag = 0;
 
 zeta = 0.707;
 tr = 2.23;
@@ -22,14 +19,18 @@ P.x0 = 0;
 P.xdot0 = 0;
 P.x_c = 0.15;
 
+if flag == 0
+    A = csvread('DOE.csv',1,0);
+    kp = A(2:end,1);
+    kd = A(2:end,2);
+    n = size(A,1) - 1;
+else
 
-kp = (wn^2 - a0)/b0;
-kd = (2 * zeta * wn - a1) / b0;
+    kp = (wn^2 - a0)/b0;
+    kd = (2 * zeta * wn - a1) / b0;
+    n = 1;
+end
 
-
-% n = size(A,1);
-
-n = 1;
 
 t_rise = zeros(n,1);
 t_set = zeros(n,1);
@@ -37,9 +38,15 @@ overshoot = zeros(n,1);
 
 % pass in each row to model
 for i = 1:n
-    info = response(kp, kd,P,1);
+    info = response(kp(i), kd(i),P,flag);
+    t_rise(i) = info.RiseTime;
+    t_set(i) = info.SettlingTime;
+    overshoot(i) = info.Overshoot;
 end
 
-% export table
-% T = table(kp_chi, ki_chi, kp_phi, kd_phi, ki_phi, t_rise, t_set, overshoot);
-% writetable(T,'LHC_5000_output.csv');
+if flag == 0
+    % export table
+    T = table(kp, kd, t_rise, t_set, overshoot);
+    writetable(T,'output.csv');
+end
+
