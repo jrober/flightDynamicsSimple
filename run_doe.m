@@ -1,5 +1,6 @@
 % load parameters in
 
+% Flag 0 if running the DOE, 1 if running only 1 test case
 flag = 0;
 
 zeta = 0.707;
